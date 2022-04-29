@@ -1,1 +1,1 @@
-# t-dicom-anonymization
+# Terminal DICOM Structured Content Anonymization Library
