@@ -13,7 +13,7 @@ import static org.toilelibre.libe.curl.Curl.curl;
 public class DICOMAnonymization implements DICOMAnonymizationI {
 
     private static final HashMap<String, String> baseUrl = new HashMap<>() {{
-        put("CHU", "http://139.165.99.12:8000/uploadfile");
+        put("CHU", "http://139.165.99.12:9000/uploadfile");
         put("FTGM", "http://10.97.32.223:9000/uploadfile");
         put("LOCALHOST", "http://localhost:8000/uploadfile");
     }};
