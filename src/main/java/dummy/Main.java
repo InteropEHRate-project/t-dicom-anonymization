@@ -7,10 +7,9 @@ public class Main {
 
         //String filename = "C:\\Users\\stell\\Desktop\\DICOM\\I0";
         String filename = "C:/Users/stell/Desktop/DICOM/I0";
-        String healthcareOrganization = "LOCALHOST";
 
-        DICOMAnonymization dicomAnon = new DICOMAnonymization();
-        String response = dicomAnon.invokeEndpoint(filename, healthcareOrganization);
+        DICOMAnonymization dicomAnon = new DICOMAnonymization("http://localhost:8000");
+        String response = dicomAnon.invokeEndpoint(filename);
         System.out.println("Response: " + response);
     }
 }
