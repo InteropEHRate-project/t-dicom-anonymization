@@ -1,13 +1,9 @@
 package eu.interopehrate.dicom_anonymization_library;
 
-import org.apache.http.HttpResponse;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static org.toilelibre.libe.curl.Curl.curl;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Base64;
 
 public class DICOMAnonymization implements DICOMAnonymizationI {
 
@@ -22,78 +18,40 @@ public class DICOMAnonymization implements DICOMAnonymizationI {
         this.baseUrl = baseUrl;
     }
 
-    private String declareInput(String filename) {
-        String input = "";
-        if(filename.contains("\\")) {
-            input = filename.substring(filename.lastIndexOf("\\") + 1);
-        } else if (filename.contains("/")) {
-            input = filename.substring(filename.lastIndexOf("/") + 1);
-        }
-        return input;
-    }
+    public String request(String base64Str) {
 
-    private String declareFilepath(String filename) {
-        String filepath = "";
-        if(filename.contains("\\")) {
-            filepath = filename.substring(0, filename.lastIndexOf("\\") + 1);
-        } else if (filename.contains("/")) {
-            filepath = filename.substring(0, filename.lastIndexOf("/") + 1);
-        }
-        return filepath;
-    }
+        StringBuilder response = new StringBuilder();
+        String currentUrl = baseUrl + endpoint;
 
-    private String declareOutput(String input) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
-        Date date = new Date();
-        String dateTime = simpleDateFormat.format(date);
+        try {
+            URL url = new URL(currentUrl);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "multipart/form-data");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
 
-        String fileExtension = "";
-        if (input.indexOf(".") > 0) {
-            fileExtension = input.substring(input.lastIndexOf("."));
-            input = input.substring(0, input.lastIndexOf("."));
-        }
+            OutputStream outputStream = connection.getOutputStream();
+            byte[] input = Base64.getDecoder().decode(base64Str.getBytes("ASCII"));
+            outputStream.write(input);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "ASCII"));
+            writer.close();
 
-        String output = "anonymized_" + input + "_" + dateTime + fileExtension;
+            connection.connect();
 
-        return output;
-    }
-
-    private void deleteFile(String filename) {
-        File file = new File(filename);
-        boolean delete = file.delete();
-        /*if(delete) {
-            System.out.println("File '" + filename + "' was successfully deleted.");
-        }*/
-    }
-
-    public String invokeEndpoint(String filename) {
-
-        String input = declareInput(filename);
-        String filepath = declareFilepath(filename);
-        String output = declareOutput(input);
-
-        String url = baseUrl + endpoint;
-        String command = "curl -X POST '" + url + "' -F 'dicom=@" + filepath + input + "' -o " + filepath + output;
-        //System.out.println("Command: " + command);
-
-        HttpResponse response = curl(command);
-        int status = response.getStatusLine().getStatusCode();
-
-        JSONObject responseMessage = new JSONObject();
-        String message = "";
-        responseMessage.put("status", status);
-
-        if (status == 200) {
-            message = "File '" + input + "' was successfully anonymized.";
-        } else if (status == 400) {
-            message = "Anonymization process was not applied to this file. File '" + input + "' is NOT in DICOM format.";
-            deleteFile(filepath + output);
-        } else {
-            message = response.getStatusLine().getReasonPhrase();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "ASCII"));
+            String responseLine = null;
+            while ((responseLine = bufferedReader.readLine()) != null) {
+                response.append(responseLine.trim()); //
+                //System.out.println(responseLine.trim());
+            }
+            //System.out.println(response.toString());
+            bufferedReader.close();
+            connection.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        responseMessage.put("message", message);
-
-        return responseMessage.toString();
+        return response.toString();
     }
 }
