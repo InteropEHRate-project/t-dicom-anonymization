@@ -7,7 +7,7 @@
     <groupId>eu.interopehrate</groupId>
     <artifactId>t-dicom-anonymization</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <build>
         <plugins>
             <plugin>
@@ -26,24 +26,13 @@
         <maven.compiler.target>14</maven.compiler.target>
     </properties>
 
-
     <distributionManagement>
         <repository>
-            <id>nexus</id>
-            <url>http://213.249.46.206:8081/repository/maven-releases/</url>
+            <id>github</id>
+            <name>GitHub interopehrate-project Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/interopehrate-project/t-dicom-anonymization</url>
         </repository>
-        <snapshotRepository>
-            <id>nexus</id>
-            <url>http://213.249.46.206:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>iehr-project-repo</id>
-            <url>http://213.249.46.206:8081/repository/maven-releases/</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
